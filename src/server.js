@@ -1,3 +1,6 @@
+
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const pool = require('./config/db');
@@ -7,8 +10,10 @@ const authorizeRole = require('./middleware/roleMiddleware');
 const eventRoutes = require('./routes/eventRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-
-require('dotenv').config();
+const userRoutes = require('./routes/userRoutes');
+const userManagementRoutes =
+require('./routes/userManagementRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 
@@ -19,6 +24,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
+app.use(
+  '/api/manage-users',
+  userManagementRoutes
+);
+app.use('/api/chat', chatRoutes);
 
 app.get('/api/profile', verifyToken, (req, res) => {
   res.json({
@@ -44,12 +55,16 @@ app.get('/', (req, res) => {
   });
 });
 
+// Try to acquire a client at startup to validate DB connection.
 pool.connect()
-  .then(() => {
+  .then((client) => {
+    client.release();
     console.log('✅ Database Connected');
   })
   .catch((err) => {
     console.error('❌ Database Connection Error:', err.message);
+    // Exit so process managers (or developer) notice immediately.
+    process.exit(1);
   });
 
 const PORT = process.env.PORT || 5000;
