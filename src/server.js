@@ -62,10 +62,10 @@ pool.connect()
     console.log('✅ Database Connected');
   })
   .catch((err) => {
-    console.error('❌ Database Connection Error:', err.message);
-    // Exit so process managers (or developer) notice immediately.
-    process.exit(1);
-  });
+  console.error('❌ Database Connection Error');
+  console.error(err);
+  process.exit(1);
+});
 
 const PORT = process.env.PORT || 5000;
 
